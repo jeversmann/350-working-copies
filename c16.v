@@ -968,7 +968,7 @@ module decoder_uno(clk, instruction_in, pc_in, execute_op, arg_0, arg_1, pc_out,
 	end
 
 	assign pc_out = pc_out_reg;
-	assign execute_op = execute_op_reg;
+	assign execute_op = dest_reg == 7 ? DO_NOP : execute_op_reg ;
 	assign arg_0 = arg_0_reg;
 	assign arg_1 = arg_1_reg;
 	assign immediate_out = immediate_out_reg;
