@@ -1,24 +1,38 @@
-Width=16;
-Depth=16;
+WIDTH=16;
+DEPTH=30;
 
 ADDRESS_RADIX=DEC;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-	0: 01e1;
-	1: 02e2;
-	2: ae0a;
-	3: 03c4;
-	4: a560;
-	5: 00ed;
-	6: b805;
-	7: a804;
-	8: 0000;
-	9: 0000;
-	10: 0000;
-	11: 0000;
-	12: 0000;
-	13: 000a;
-	14: face;
-	15: ffff;
+0:  00e1; -- add r0 r7 1
+1:  00e2; -- add r0 r7 2
+2:  00e3; -- add r0 r7 3
+3:  00e4; -- add r0 r7 4
+4:  a8fd; -- ld r0 -3
+5:  00ef; -- add r0 r7 15
+6:  0fe7; -- add r7 r7 r7 NOOP
+7:  0fe7; -- add r7 r7 r7 NOOP
+8:  08e7; -- add r0 r7 r7
+9:  0101; -- add r1 r0 1
+10: 0221; -- add r2 r1 1
+11: 0341; -- add r3 r2 1
+12: 006c; -- add r0 r3 12
+13: 0fe7; -- add r7 r7 r7 NOOP
+14: 0fe7; -- add r7 r7 r7 NOOP
+15: 08e7; -- add r0 r7 r7
+16: 0101; -- add r1 r0 1
+17: 00ef; -- add r0 r7 15
+18: 0101; -- add r1 r0 1
+19: 0fe7; -- add r7 r7 r7 NOOP
+20: 0fe7; -- add r7 r7 r7 NOOP
+21: 08e7; -- add r0 r7 r7
+22: a8ff; -- ld r0 -1
+23: 01e1; -- add r1 r7 1
+24: a8fd; -- ld r0 -3
+25: 02e1; -- add r2 r7 1
+26: a8f9; -- ld r0 -7
+27: 01e1; -- add r1 r7 1
+28: a8f7; -- ld r0 -9
+29: 02e1; -- add r2 r7 1
 END;
