@@ -1007,7 +1007,7 @@ module memoreer(clk, pc_in,	operand_0, operand_1,
 	reg [15:0] operand_1_reg;
 	reg [15:0] operand_2_reg;
 	reg [3:0]  operation_reg;
-	reg [3:0]  destination_in_reg;
+	reg [3:0]  destination_in_reg = 7;
 	
 	reg [15:0] mem_addr_out_reg;
 	reg [31:0] cycles_we_have_stalled;
@@ -1017,7 +1017,7 @@ module memoreer(clk, pc_in,	operand_0, operand_1,
 
 	reg [15:0] result_save;
 	reg [15:0] pc_save;
-	reg [2:0]  destination_save;
+	reg [2:0]  destination_save = 7;
 	reg done_reg;
 	reg [3:0]  operation_save;
 	
@@ -1044,11 +1044,11 @@ module memoreer(clk, pc_in,	operand_0, operand_1,
 	end
 
 	always @(posedge clk) begin
+		destination_save <= 7;
 		if (start_stalin == 1) begin
 			cycles_we_have_stalled <= 0;
 			pc_save <= pc_in;
 			operation_save <= operation_reg;
-			destination_save <= destination_in;
 		end else begin
 			cycles_we_have_stalled <= cycles_we_have_stalled + 1;
 		end
@@ -1056,9 +1056,8 @@ module memoreer(clk, pc_in,	operand_0, operand_1,
 			done_reg <= 1;
 			if (operation_save == DO_LOAD) begin
 				result_save <= load_value;
-			end else begin
-				destination_save <= 7;
-			end
+				destination_save <= destination_in_reg;
+			end 
 		end else begin
 			done_reg <= 0;
 		end
