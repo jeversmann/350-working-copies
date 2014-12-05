@@ -104,7 +104,7 @@ output		     [6:0]		HEX3;
 	 reg mem_wren;
 	 reg next_mem_wren;
 	 wire [15:0]mem_out;
-	 ram ((next_state == F) ? pc : pc, clk, vd, mem_wren, mem_out);
+	 ram ((next_state == F) ? pc : next_xv_out, clk, vd, mem_wren, mem_out);
 	 
 	///////////////////
 	// decode & regs //
@@ -333,8 +333,7 @@ always @(*) begin
 	end else if(SW[7]) begin
 			debug = imm5;
 	 end else if(SW[6]) begin
-			debug[15:8] = xv_0;
-			debug[7:0] = xv_1;
+			debug = mem_out;
 	 end else if(SW[5]) begin
 			debug[15:12] = rd;
 			debug[11:8] = ra;
@@ -428,6 +427,7 @@ always @(posedge clk) begin
 			case (wb_op)
 				WB_REG: begin
 					if (next_rd != 7) regs[next_rd] <= rfdata;
+					if (m_op == MEM_LD) regs[next_rd] <= mem_out;
 				end
 				WB_PC: begin
 				end
