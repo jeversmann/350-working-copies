@@ -56,6 +56,7 @@ reg clk25 = 0;
 wire resetn;
 
 reg[9:0] count = 0;
+reg[7:0] char = 8'h30;
 
 //=======================================================
 //  Structural coding
@@ -64,7 +65,7 @@ reg[9:0] count = 0;
 wire[7:0] r;
 wire[7:0] g;
 wire[7:0] b;
-ascii(clk25, mem_addr, 16'h30,
+ascii(clk25, mem_addr, {SW[7:0], char},
   x, y, r, g, b );
 
 hdmi(
@@ -84,11 +85,12 @@ hdmi(
 
 // Divide the 50mhz clock in half
 always @(posedge CLOCK_50_B5B) begin
-  if(SW[0]) begin
     clk25 <= !clk25;
     count <= count + 1;
-  end
 end
+
+always @(posedge KEY[3])
+	char = char + 8'b1;
 
 assign LEDR = count;
 assign LEDG = g;
@@ -118,18 +120,14 @@ wire [8:0] col = x[11:3];
 wire [3:0] x_off = x[2:0];
 wire [3:0] y_off = y[2:0];
 
-reg [39:0] ascii_mask;
+reg [63:0] ascii_mask;
 reg [23:0] foreground;
 reg [23:0] background;
 reg set;
 
 always @(*) begin
   //mem_addr = row * 80 + col;
-  if (x_off == 0 || x_off > 5) begin
-    set = 0;
-  end else begin
-    set = ascii_mask[39 - (y_off * 5 + (x_off-1))];
-  end
+  set = ascii_mask[64 - (y_off * 8 + x_off)];
 end
 
 assign r = set ? background[23:16] : foreground[23:16];
@@ -178,7 +176,7 @@ always @(*) begin
   endcase
 
   // Select an ascii_mask based on the bottom 8 bits
-  case (mem_value[7:0] + ((row+col)%10))
+  case (mem_value[7:0])
     8'h20: ascii_mask = {
             8'b11111111,
             8'b11111111,
