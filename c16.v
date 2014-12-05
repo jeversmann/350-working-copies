@@ -143,10 +143,11 @@ output		     [6:0]		HEX3;
 /////////////
  
 reg [15:0] nextpc;        // the next pc
-reg [15:0]rfdata;         // the register value
+reg [15:0] rfdata;         // the register value
  
 always @(*) begin
-	 case (next_state)
+	 next_xv_out = 16'hface; // This shouldn't be read
+	 case (cur_state)
 		I: begin
 		end
 		F: begin
@@ -327,14 +328,14 @@ always @(*) begin
 		debug = inst;
     end else if(SW[9]) begin
 			debug = xv_out;
-	end else if(SW[6]) begin
-			debug = imm8;
+	end else if(SW[8]) begin
+			debug = next_xv_out;
 	end else if(SW[7]) begin
 			debug = imm5;
-	 end else if(SW[5]) begin
+	 end else if(SW[6]) begin
 			debug[15:8] = xv_0;
 			debug[7:0] = xv_1;
-	 end else if(SW[8]) begin
+	 end else if(SW[5]) begin
 			debug[15:12] = rd;
 			debug[11:8] = ra;
 			debug[7:4] = rb;
@@ -371,7 +372,6 @@ always @(posedge clk) begin
 			cur_state <= D;
 			next_state <= X;
 		end
-		
 		D: begin
 			inst <= mem_out;
 			m_op <= next_m_op;
@@ -386,18 +386,16 @@ always @(posedge clk) begin
 		X: begin
 			case (m_op)
 				MEM_LD: begin
-					xv_out <= next_xv_out;
 					mem_wren <= 0;
 				end
 				MEM_ST: begin
-					xv_out <= next_xv_out;
 					mem_wren <= 1;
 				end
 				NOP: begin
-					xv_out <= next_xv_out;
 					mem_wren <= 0;
 				end
 			endcase
+			xv_out <= next_xv_out;
 			cur_state <= M;
 			next_state <= W;
 		end
