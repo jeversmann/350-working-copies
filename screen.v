@@ -71,29 +71,6 @@ parameter WB_REG = 4'h0;
 parameter WB_PC = 4'h1;
 // NOP from above reused
 
-
-//=======================================================
-//  PORT declarations
-//=======================================================
-
-//////////// LED //////////
-output               [7:0]              LEDG;
-output               [9:0]              LEDR;
-
-//////////// KEY //////////
-input                                   CPU_RESET_n;
-input                [3:0]              KEY;
-
-//////////// SW //////////
-input                [9:0]              SW;
-
-//////////// SEG7 //////////
-output               [6:0]              HEX0;
-output               [6:0]              HEX1;
-output               [6:0]              HEX2;
-output               [6:0]              HEX3;
-
-
 /////////////////////////
 // The processor state //
 /////////////////////////
@@ -103,7 +80,10 @@ reg [15:0]pc;             // the pc
 reg [2:0]cur_state = I;
 reg [2:0]next_state = F;
 
-wire clk = KEY[0];        // single step using key0
+
+reg clk25 = 0;
+wire clk = clk25;
+
 initial begin
         pc = 0;
         regs[0] = 0;
@@ -460,13 +440,31 @@ end
 //  Display stuff
 //=======================================================
 
+
 wire[7:0] r;
 wire[7:0] g;
 wire[7:0] b;
-ascii(clk25, mem_addr, {SW[7:0], char},
+
+// Video Memory
+wire[15:0] ignore;
+wire[15:0] mem_addr;
+wire[15:0] mem_value;
+ram2 (
+	.address_a(mem_addr),
+	.address_b(next_xv_out),
+	.clock(clk25),
+	.data_a(0),
+	.data_b(vd),
+	.wren_a(0),
+	.wren_b(mem_wren),
+	.q_a(mem_value),
+	.q_b(ignore)
+	);
+
+ascii(clk25, mem_addr, mem_value,
   x, y, r, g, b );
 
-hdmi(
+hdmi #(2)(
     clk25, KEY[0],
     x, y,
     r, g, b,
@@ -505,8 +503,8 @@ input[11:0] y;
 
 wire [8:0] row = y[11:3];
 wire [8:0] col = x[11:3];
-wire [3:0] x_off = x[2:0];
-wire [3:0] y_off = y[2:0];
+reg [3:0] x_off [2:0];
+reg [3:0] y_off [2:0];
 
 reg [63:0] ascii_mask;
 reg [23:0] foreground;
@@ -514,8 +512,17 @@ reg [23:0] background;
 reg set;
 
 always @(*) begin
-  //mem_addr = row * 80 + col;
-  set = ascii_mask[64 - (y_off * 8 + x_off)];
+  mem_addr = row * 80 + col;
+  set = ascii_mask[64 - (y_off[1] * 8 + x_off[1])];
+end
+
+always @(posedge clk) begin
+	x_off[2] <= x[2:0];
+	x_off[1] <= x_off[2];
+	x_off[0] <= x_off[1];
+	y_off[2] <= y[2:0];
+	y_off[1] <= y_off[2];
+	y_off[0] <= y_off[1];
 end
 
 assign r = set ? background[23:16] : foreground[23:16];
